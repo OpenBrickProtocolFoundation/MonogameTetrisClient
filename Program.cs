@@ -1,3 +1,2 @@
-﻿
-using var game = new MonogameTetrisClient.Game1();
+﻿using var game = new MonogameTetrisClient.Game1();
 game.Run();
