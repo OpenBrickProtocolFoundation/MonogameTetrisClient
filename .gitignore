@@ -1,0 +1,4 @@
+﻿.idea/
+obj/
+dotnet-tools.json
+bin/
