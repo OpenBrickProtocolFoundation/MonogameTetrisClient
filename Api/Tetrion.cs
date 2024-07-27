@@ -4,9 +4,17 @@ using System.Runtime.InteropServices;
 namespace MonogameTetrisClient.Api;
 
 internal class Tetrion {
+    // OBPF_EXPORT ObpfMinoPositions obpf_tetromino_get_mino_positions(ObpfTetrominoType type, ObpfRotation rotation);
+    [DllImport(Common.DllPath, EntryPoint = "obpf_tetromino_get_mino_positions")]
+    public static extern MinoPositions GetMinoPositions(TetrominoType type, Rotation rotation);
+
     // struct ObpfTetrion* obpf_create_tetrion(uint64_t seed);
     [DllImport(Common.DllPath, EntryPoint = "obpf_create_tetrion")]
     public static extern IntPtr CreateTetrion(ulong seed);
+
+    // OBPF_EXPORT ObpfLineClearDelayState obpf_tetrion_get_line_clear_delay_state(struct ObpfTetrion const* tetrion);
+    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_get_line_clear_delay_state")]
+    public static extern LineClearDelayState GetLineClearDelayState(IntPtr tetrion);
 
     // void obpf_destroy_tetrion(struct ObpfTetrion const* tetrion);
     [DllImport(Common.DllPath, EntryPoint = "obpf_destroy_tetrion")]
@@ -18,6 +26,17 @@ internal class Tetrion {
     // );
     [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_try_get_active_tetromino")]
     public static extern bool TryGetActiveTetromino(IntPtr tetrion, out Tetromino tetromino);
+
+    // bool obpf_tetrion_try_get_ghost_tetromino(
+    //     struct ObpfTetrion const* tetrion,
+    //     struct ObpfTetromino* out_tetromino
+    // );
+    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_try_get_ghost_tetromino")]
+    public static extern bool TryGetGhostTetromino(IntPtr tetrion, out Tetromino tetromino);
+
+    // ObpfTetrominoType obpf_tetrion_get_hold_piece(struct ObpfTetrion const* tetrion);
+    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_get_hold_piece")]
+    public static extern TetrominoType GetHoldPiece(IntPtr tetrion);
 
     // uint64_t obpf_tetrion_get_next_frame(struct ObpfTetrion const* tetrion);
     [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_get_next_frame")]
@@ -34,6 +53,10 @@ internal class Tetrion {
     // uint8_t obpf_tetrion_height(void);
     [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_height")]
     public static extern byte GetHeight();
+
+    // uint8_t obpf_tetrion_num_invisible_lines(void);
+    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_num_invisible_lines")]
+    public static extern byte GetNumInvisibleLines();
 
     // OBPF_EXPORT ObpfTetrominoType obpf_tetrion_matrix_get(const struct ObpfTetrion* tetrion, ObpfVec2 position);
     [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_matrix_get")]

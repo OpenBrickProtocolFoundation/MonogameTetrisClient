@@ -8,11 +8,23 @@ public class Tetrion : IDisposable {
     private bool _disposed = false;
     public int Width { get; init; }
     public int Height { get; init; }
+    public int NumInvisibleLines { get; init; }
 
     public Tetrion(ulong seed) {
         _tetrion = Api.Tetrion.CreateTetrion(seed);
         Width = Api.Tetrion.GetWidth();
         Height = Api.Tetrion.GetHeight();
+        NumInvisibleLines = Api.Tetrion.GetNumInvisibleLines();
+    }
+
+    public LineClearDelayState GetLineClearDelayState() {
+        var ffiState = Api.Tetrion.GetLineClearDelayState(_tetrion);
+        var clearedLines = new int[ffiState.Count];
+        for (var i = 0; i < ffiState.Count; i++) {
+            clearedLines[i] = (int)ffiState.Lines[i];
+        }
+
+        return new LineClearDelayState(clearedLines, ffiState.Countdown, ffiState.Delay);
     }
 
     public Tetromino? TryGetActiveTetromino() {
@@ -22,6 +34,19 @@ public class Tetrion : IDisposable {
 
         var minoPositions = tetromino.MinoPositions.Select(p => new Vec2(p.X, p.Y)).ToArray();
         return new Tetromino(minoPositions, (TetrominoType)tetromino.Type);
+    }
+
+    public Tetromino? TryGetGhostTetromino() {
+        if (!Api.Tetrion.TryGetGhostTetromino(_tetrion, out var tetromino)) {
+            return null;
+        }
+
+        var minoPositions = tetromino.MinoPositions.Select(p => new Vec2(p.X, p.Y)).ToArray();
+        return new Tetromino(minoPositions, (TetrominoType)tetromino.Type);
+    }
+
+    public TetrominoType GetHoldPiece() {
+        return (TetrominoType)Api.Tetrion.GetHoldPiece(_tetrion);
     }
 
     public ulong GetNextFrame() {
@@ -53,6 +78,11 @@ public class Tetrion : IDisposable {
         }
 
         return result;
+    }
+
+    public static Vec2[] GetMinoPositions(TetrominoType type, Rotation rotation) {
+        var ffiMinoPositions = Api.Tetrion.GetMinoPositions((Api.TetrominoType)type, (Api.Rotation)rotation);
+        return ffiMinoPositions.Positions.Select(p => new Vec2(p.X, p.Y)).ToArray();
     }
 
     private void ReleaseUnmanagedResources() {
