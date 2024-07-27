@@ -6,9 +6,13 @@ namespace MonogameTetrisClient;
 public class Tetrion : IDisposable {
     private readonly IntPtr _tetrion;
     private bool _disposed = false;
+    public int Width { get; init; }
+    public int Height { get; init; }
 
     public Tetrion(ulong seed) {
         _tetrion = Api.Tetrion.CreateTetrion(seed);
+        Width = Api.Tetrion.GetWidth();
+        Height = Api.Tetrion.GetHeight();
     }
 
     public Tetromino? TryGetActiveTetromino() {
@@ -35,6 +39,21 @@ public class Tetrion : IDisposable {
             keyState.Hold
         );
         Api.Tetrion.SimulateNextFrame(_tetrion, ffiKeyState);
+    }
+
+    public TetrominoType[,] GetMatrix() {
+        var matrix = Api.Tetrion.GetMatrix(_tetrion);
+        var result = new TetrominoType[Width, Height];
+        for (var x = 0; x < Width; x++) {
+            for (var y = 0; y < Height; y++) {
+                result[x, y] = (TetrominoType)Api.Tetrion.GetMatrixValue(
+                    matrix,
+                    new Api.Vec2 { X = (byte)x, Y = (byte)y }
+                );
+            }
+        }
+
+        return result;
     }
 
     private void ReleaseUnmanagedResources() {
