@@ -27,10 +27,6 @@ internal class Tetrion {
     [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_simulate_next_frame")]
     public static extern void SimulateNextFrame(IntPtr tetrion, KeyState keyState);
 
-    // struct ObpfMatrix const* obpf_tetrion_matrix(struct ObpfTetrion const* tetrion);
-    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_matrix")]
-    public static extern IntPtr GetMatrix(IntPtr tetrion);
-
     // uint8_t obpf_tetrion_width(void);
     [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_width")]
     public static extern byte GetWidth();
@@ -39,7 +35,7 @@ internal class Tetrion {
     [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_height")]
     public static extern byte GetHeight();
 
-    // ObpfTetrominoType obpf_matrix_get(struct ObpfMatrix const* matrix, ObpfVec2 position);
-    [DllImport(Common.DllPath, EntryPoint = "obpf_matrix_get")]
-    public static extern TetrominoType GetMatrixValue(IntPtr matrix, Vec2 position);
+    // OBPF_EXPORT ObpfTetrominoType obpf_tetrion_matrix_get(const struct ObpfTetrion* tetrion, ObpfVec2 position);
+    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_matrix_get")]
+    public static extern TetrominoType GetMatrixValue(IntPtr tetrion, Vec2 position);
 }

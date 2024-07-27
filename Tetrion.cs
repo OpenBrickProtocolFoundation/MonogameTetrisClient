@@ -42,12 +42,11 @@ public class Tetrion : IDisposable {
     }
 
     public TetrominoType[,] GetMatrix() {
-        var matrix = Api.Tetrion.GetMatrix(_tetrion);
         var result = new TetrominoType[Width, Height];
         for (var x = 0; x < Width; x++) {
             for (var y = 0; y < Height; y++) {
                 result[x, y] = (TetrominoType)Api.Tetrion.GetMatrixValue(
-                    matrix,
+                    _tetrion,
                     new Api.Vec2 { X = (byte)x, Y = (byte)y }
                 );
             }
