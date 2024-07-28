@@ -250,7 +250,6 @@ public class ObpfGame : Game {
     }
 
     private void DrawMino(Vec2 position, Color color) {
-        Tetromino activeTetromino;
         _spriteBatch.Draw(
             _minoTexture,
             new Vector2(position.X * _minoTexture.Width, position.Y * _minoTexture.Height),
