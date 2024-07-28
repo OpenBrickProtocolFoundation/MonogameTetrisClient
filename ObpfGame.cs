@@ -59,6 +59,8 @@ public class ObpfGame : Game {
 
     public ObpfGame() {
         _graphics = new GraphicsDeviceManager(this);
+        _graphics.SynchronizeWithVerticalRetrace = false;
+        IsFixedTimeStep = false;
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
     }
