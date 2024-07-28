@@ -95,7 +95,7 @@ public class ObpfGame : Game {
             var simulationTick = (ulong)(elapsedTime / (1.0 / 60.0));
 
             if (nextTick >= simulationTick) {
-                Thread.Sleep(8);
+                Thread.Yield();
                 continue;
             }
 
@@ -122,7 +122,7 @@ public class ObpfGame : Game {
             }
 
             _tetrionMutex.ReleaseMutex();
-            Thread.Sleep(8);
+            Thread.Yield();
         }
     }
 
