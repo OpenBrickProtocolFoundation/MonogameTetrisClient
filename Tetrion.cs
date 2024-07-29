@@ -9,12 +9,14 @@ public class Tetrion : IDisposable {
     public int Width { get; init; }
     public int Height { get; init; }
     public int NumInvisibleLines { get; init; }
+    private TetrominoType[,] _matrixCache;
 
     public Tetrion(ulong seed) {
         _tetrion = Api.Tetrion.CreateTetrion(seed);
         Width = Api.Tetrion.GetWidth();
         Height = Api.Tetrion.GetHeight();
         NumInvisibleLines = Api.Tetrion.GetNumInvisibleLines();
+        _matrixCache = new TetrominoType[Width, Height];
     }
 
     public LineClearDelayState GetLineClearDelayState() {
@@ -67,17 +69,16 @@ public class Tetrion : IDisposable {
     }
 
     public TetrominoType[,] GetMatrix() {
-        var result = new TetrominoType[Width, Height];
         for (var x = 0; x < Width; x++) {
             for (var y = 0; y < Height; y++) {
-                result[x, y] = (TetrominoType)Api.Tetrion.GetMatrixValue(
+                _matrixCache[x, y] = (TetrominoType)Api.Tetrion.GetMatrixValue(
                     _tetrion,
                     new Api.Vec2 { X = (byte)x, Y = (byte)y }
                 );
             }
         }
 
-        return result;
+        return _matrixCache;
     }
 
     public static Vec2[] GetMinoPositions(TetrominoType type, Rotation rotation) {
