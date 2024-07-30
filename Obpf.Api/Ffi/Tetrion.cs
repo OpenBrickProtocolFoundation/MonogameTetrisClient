@@ -1,7 +1,6 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
-namespace MonogameTetrisClient.Api.Ffi;
+namespace Obpf.Api.Ffi;
 
 internal class Tetrion {
     // OBPF_EXPORT ObpfMinoPositions obpf_tetromino_get_mino_positions(ObpfTetrominoType type, ObpfRotation rotation);
@@ -56,7 +55,7 @@ internal class Tetrion {
 
     // void obpf_tetrion_simulate_next_frame(struct ObpfTetrion* tetrion, ObpfKeyState key_state);
     [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_simulate_next_frame")]
-    public static extern void SimulateNextFrame(IntPtr tetrion, Api.Ffi.KeyState keyState);
+    public static extern void SimulateNextFrame(IntPtr tetrion, KeyState keyState);
 
     // uint8_t obpf_tetrion_width(void);
     [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_width")]

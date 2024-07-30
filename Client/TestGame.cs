@@ -36,7 +36,7 @@ public class TestGame : Game {
         _graphics.PreferredBackBufferHeight = 640;
         _graphics.ApplyChanges();
 
-        _sceneStack.PushScene(new Scenes.SingleplayerGame());
+        _sceneStack.PushScene(new Scenes.SingleplayerScene());
 
         base.Initialize();
     }

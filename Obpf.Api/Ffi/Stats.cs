@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace MonogameTetrisClient.Api.Ffi;
+namespace Obpf.Api.Ffi;
 
 /* typedef struct {
     uint64_t score;

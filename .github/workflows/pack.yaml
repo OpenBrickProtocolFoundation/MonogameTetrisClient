@@ -1,0 +1,56 @@
+name: Build and Publish NuGet Package
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.7
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.x'
+          
+      - uses: actions/cache@v4
+        name: Setup Cache
+        id: cache-setup
+        with:
+          path: |
+            ~/.nuget/packages
+            ~/.dotnet
+          key: ${{ runner.os }}-${{ github.ref_name }}
+          restore-keys: |
+            ${{ runner.os }}-${{ github.ref_name }}
+
+      - name: Build and package
+        run: |
+          dotnet build -c Release -o ./nuget OBPF.APi/OBPF.APi.csproj
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-package
+          path: ./nuget/*.nupkg
+
+      - name: Publish package
+        run: |
+          dotnet nuget push ./nuget/*.nupkg -s https://nuget.pkg.github.com/${GITHUB_OWNER}/index.json -k ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_OWNER: ${{ github.repository_owner }}
+
+#      - name: Publish package To Nuget
+#        run: |
+#          dotnet nuget push ./nuget/*.nupkg --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
