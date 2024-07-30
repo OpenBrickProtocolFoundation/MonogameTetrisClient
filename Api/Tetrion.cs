@@ -16,6 +16,10 @@ internal class Tetrion {
     [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_get_stats")]
     public static extern Stats GetStats(IntPtr tetrion);
 
+    // bool obpf_tetrion_is_game_over(struct ObpfTetrion const* tetrion);
+    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_is_game_over")]
+    public static extern bool IsGameOver(IntPtr tetrion);
+
     // OBPF_EXPORT ObpfLineClearDelayState obpf_tetrion_get_line_clear_delay_state(struct ObpfTetrion const* tetrion);
     [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_get_line_clear_delay_state")]
     public static extern LineClearDelayState GetLineClearDelayState(IntPtr tetrion);

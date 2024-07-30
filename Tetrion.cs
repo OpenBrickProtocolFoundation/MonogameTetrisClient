@@ -26,6 +26,10 @@ public class Tetrion : IDisposable {
         return new Stats(ffiStats.Score, ffiStats.LinesCleared, ffiStats.Level);
     }
 
+    public bool IsGameOver() {
+        return Api.Tetrion.IsGameOver(_tetrion);
+    }
+
     public LineClearDelayState GetLineClearDelayState() {
         var ffiState = Api.Tetrion.GetLineClearDelayState(_tetrion);
         var clearedLines = new int[ffiState.Count];

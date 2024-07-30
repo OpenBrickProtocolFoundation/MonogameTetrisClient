@@ -32,7 +32,11 @@ public class ObpfGame : Game {
     private Texture2D _whiteTexture = null!;
     private SpriteFont _font = null!;
     private Thread _simulationThread = null!;
-    private CancellationTokenSource _cancellationTokenSource = new();
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    private double _elapsedTime = 0.0;
+    private double _lastFpsMeasureTime = 0.0;
+    private uint _framesSinceLastFpsMeasure = 0u;
+    private string _fpsString = "-";
 
     private static readonly Dictionary<TetrominoType, Color> Colors = new()
     {
@@ -173,6 +177,8 @@ public class ObpfGame : Game {
         var lineClearDelayState = _tetrion.GetLineClearDelayState();
         var previewPieces = _tetrion.GetPreviewPieces();
         var stats = _tetrion.GetStats();
+        var isGameOver = _tetrion.IsGameOver();
+        var nextFrame = _tetrion.GetNextFrame();
         _tetrionMutex.ReleaseMutex();
 
         GraphicsDevice.Clear(Color.Black);
@@ -234,9 +240,40 @@ public class ObpfGame : Game {
             }
         }
 
+        var elapsedSeconds = (double)nextFrame / 60.0;
+        var timeString = elapsedSeconds < 60.0
+            ? TimeSpan.FromSeconds(elapsedSeconds).ToString(@"ss\.fff")
+            : TimeSpan.FromSeconds(elapsedSeconds).ToString(@"mm\:ss\.f");
+
+        _elapsedTime += gameTime.ElapsedGameTime.TotalSeconds;
+        var timeSinceLastFpsMeasure = _elapsedTime - _lastFpsMeasureTime;
+        if (timeSinceLastFpsMeasure >= 1.0) {
+            _fpsString = $"{Math.Round((_framesSinceLastFpsMeasure / timeSinceLastFpsMeasure))}";
+            _lastFpsMeasureTime = _elapsedTime;
+            _framesSinceLastFpsMeasure = 0;
+        } else {
+            ++_framesSinceLastFpsMeasure;
+        }
+
+        var statsString =
+            @$"Score:
+{stats.Score}
+
+Level:
+{stats.Level}
+
+Lines:
+{stats.LinesCleared}
+
+Time:
+{timeString}
+
+FPS:
+{_fpsString}";
+
         _spriteBatch.DrawString(
             _font,
-            $"Score:\n{stats.Score}\n\nLevel:\n{stats.Level}\n\nLines:\n{stats.LinesCleared}",
+            statsString,
             new Vector2(_minoTexture.Width, _minoTexture.Height * 6),
             Color.Black,
             0,
@@ -245,6 +282,32 @@ public class ObpfGame : Game {
             SpriteEffects.None,
             0.5f
         );
+
+        if (isGameOver) {
+            _spriteBatch.Draw(
+                _whiteTexture,
+                new Rectangle(
+                    0, //6 * _minoTexture.Width,
+                    0,
+                    _minoTexture.Width * (_tetrion.Width + 12),
+                    _minoTexture.Height * _tetrion.Height
+                ),
+                Color.Black * 0.5f
+            );
+
+            var textSize = _font.MeasureString("Game Over");
+            _spriteBatch.DrawString(
+                _font,
+                "Game Over",
+                new Vector2(_graphics.PreferredBackBufferWidth / 2f, _graphics.PreferredBackBufferHeight / 2f),
+                Color.White,
+                0,
+                textSize / 2f,
+                1f,
+                SpriteEffects.None,
+                0.5f
+            );
+        }
 
         _spriteBatch.End();
 
