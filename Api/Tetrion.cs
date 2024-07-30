@@ -12,6 +12,10 @@ internal class Tetrion {
     [DllImport(Common.DllPath, EntryPoint = "obpf_create_tetrion")]
     public static extern IntPtr CreateTetrion(ulong seed);
 
+    // ObpfStats obpf_tetrion_get_stats(struct ObpfTetrion const* tetrion);
+    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_get_stats")]
+    public static extern Stats GetStats(IntPtr tetrion);
+
     // OBPF_EXPORT ObpfLineClearDelayState obpf_tetrion_get_line_clear_delay_state(struct ObpfTetrion const* tetrion);
     [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_get_line_clear_delay_state")]
     public static extern LineClearDelayState GetLineClearDelayState(IntPtr tetrion);
@@ -33,6 +37,10 @@ internal class Tetrion {
     // );
     [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_try_get_ghost_tetromino")]
     public static extern bool TryGetGhostTetromino(IntPtr tetrion, out Tetromino tetromino);
+
+    // ObpfPreviewPieces obpf_tetrion_get_preview_pieces(struct ObpfTetrion const* tetrion);
+    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_get_preview_pieces")]
+    public static extern PreviewPieces GetPreviewPieces(IntPtr tetrion);
 
     // ObpfTetrominoType obpf_tetrion_get_hold_piece(struct ObpfTetrion const* tetrion);
     [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_get_hold_piece")]

@@ -10,6 +10,7 @@ public class Tetrion : IDisposable {
     public int Height { get; init; }
     public int NumInvisibleLines { get; init; }
     private TetrominoType[,] _matrixCache;
+    private TetrominoType[] _previewCache;
 
     public Tetrion(ulong seed) {
         _tetrion = Api.Tetrion.CreateTetrion(seed);
@@ -17,6 +18,12 @@ public class Tetrion : IDisposable {
         Height = Api.Tetrion.GetHeight();
         NumInvisibleLines = Api.Tetrion.GetNumInvisibleLines();
         _matrixCache = new TetrominoType[Width, Height];
+        _previewCache = new TetrominoType[6];
+    }
+
+    public Stats GetStats() {
+        var ffiStats = Api.Tetrion.GetStats(_tetrion);
+        return new Stats(ffiStats.Score, ffiStats.LinesCleared, ffiStats.Level);
     }
 
     public LineClearDelayState GetLineClearDelayState() {
@@ -49,6 +56,15 @@ public class Tetrion : IDisposable {
 
     public TetrominoType GetHoldPiece() {
         return (TetrominoType)Api.Tetrion.GetHoldPiece(_tetrion);
+    }
+
+    public TetrominoType[] GetPreviewPieces() {
+        var ffiPreviewPieces = Api.Tetrion.GetPreviewPieces(_tetrion);
+        for (var i = 0; i < ffiPreviewPieces.Types.Length; i++) {
+            _previewCache[i] = (TetrominoType)ffiPreviewPieces.Types[i];
+        }
+
+        return _previewCache;
     }
 
     public ulong GetNextFrame() {

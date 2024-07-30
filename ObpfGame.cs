@@ -30,6 +30,7 @@ public class ObpfGame : Game {
     private Texture2D _minoTexture = null!;
     private Texture2D _gridTexture = null!;
     private Texture2D _whiteTexture = null!;
+    private SpriteFont _font = null!;
     private Thread _simulationThread = null!;
     private CancellationTokenSource _cancellationTokenSource = new();
 
@@ -67,7 +68,7 @@ public class ObpfGame : Game {
 
     protected override void Initialize() {
         _graphics.IsFullScreen = false;
-        _graphics.PreferredBackBufferWidth = 512;
+        _graphics.PreferredBackBufferWidth = 704;
         _graphics.PreferredBackBufferHeight = 640;
         _graphics.ApplyChanges();
 
@@ -87,6 +88,7 @@ public class ObpfGame : Game {
         _gridTexture = Content.Load<Texture2D>("tetrion");
         _whiteTexture = new Texture2D(GraphicsDevice, 1, 1);
         _whiteTexture.SetData(new[] { Color.White });
+        _font = Content.Load<SpriteFont>("font");
     }
 
     private void KeepSimulating() {
@@ -169,6 +171,8 @@ public class ObpfGame : Game {
         var ghostTetromino = _tetrion.TryGetGhostTetromino();
         var holdPieceType = _tetrion.GetHoldPiece();
         var lineClearDelayState = _tetrion.GetLineClearDelayState();
+        var previewPieces = _tetrion.GetPreviewPieces();
+        var stats = _tetrion.GetStats();
         _tetrionMutex.ReleaseMutex();
 
         GraphicsDevice.Clear(Color.Black);
@@ -181,6 +185,13 @@ public class ObpfGame : Game {
             var holdPiecePositions = Tetrion.GetMinoPositions(holdPieceType, Rotation.North);
             foreach (var position in holdPiecePositions) {
                 DrawMino(position + new Vec2(1, 2), Colors[holdPieceType]);
+            }
+        }
+
+        for (int i = 0; i < previewPieces.Length; ++i) {
+            var previewPiecePositions = Tetrion.GetMinoPositions(previewPieces[i], Rotation.North);
+            foreach (var position in previewPiecePositions) {
+                DrawMino(position + new Vec2(17, 2 + i * 3), Colors[previewPieces[i]]);
             }
         }
 
@@ -209,7 +220,6 @@ public class ObpfGame : Game {
                 (byte)Math.Round(255.0 * relativeVisibility),
                 (byte)Math.Round(255.0 * relativeVisibility)
             );
-            Console.WriteLine($"relative visibility: {color}");
             foreach (var line in lineClearDelayState.Lines) {
                 _spriteBatch.Draw(
                     _whiteTexture,
@@ -223,6 +233,18 @@ public class ObpfGame : Game {
                 );
             }
         }
+
+        _spriteBatch.DrawString(
+            _font,
+            $"Score:\n{stats.Score}\n\nLevel:\n{stats.Level}\n\nLines:\n{stats.LinesCleared}",
+            new Vector2(_minoTexture.Width, _minoTexture.Height * 6),
+            Color.Black,
+            0,
+            Vector2.Zero,
+            1f,
+            SpriteEffects.None,
+            0.5f
+        );
 
         _spriteBatch.End();
 
