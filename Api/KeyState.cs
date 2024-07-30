@@ -1,13 +1,11 @@
-﻿using System.Runtime.InteropServices;
+﻿namespace MonogameTetrisClient.Api;
 
-namespace MonogameTetrisClient.Api;
-
-/*
- * typedef struct {
-        uint8_t bitmask;
-    } ObpfKeyState;
- */
-[StructLayout(LayoutKind.Sequential)]
-internal struct KeyState {
-    public byte Bitmask;
-}
+public readonly record struct KeyState(
+    bool Left,
+    bool Right,
+    bool Down,
+    bool Drop,
+    bool RotateCw,
+    bool RotateCcw,
+    bool Hold
+);

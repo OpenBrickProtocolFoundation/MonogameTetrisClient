@@ -6,6 +6,8 @@ using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonogameTetrisClient.Api;
+using KeyState = MonogameTetrisClient.Api.KeyState;
 
 namespace MonogameTetrisClient;
 

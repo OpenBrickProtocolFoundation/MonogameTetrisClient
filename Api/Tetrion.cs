@@ -1,76 +1,135 @@
 ﻿using System;
-using System.Runtime.InteropServices;
+using System.Linq;
+using MonogameTetrisClient.Api.Ffi;
 
 namespace MonogameTetrisClient.Api;
 
-internal class Tetrion {
-    // OBPF_EXPORT ObpfMinoPositions obpf_tetromino_get_mino_positions(ObpfTetrominoType type, ObpfRotation rotation);
-    [DllImport(Common.DllPath, EntryPoint = "obpf_tetromino_get_mino_positions")]
-    public static extern MinoPositions GetMinoPositions(TetrominoType type, Rotation rotation);
+public class Tetrion : IDisposable {
+    private readonly IntPtr _tetrion;
+    private bool _disposed = false;
+    public int Width { get; init; }
+    public int Height { get; init; }
+    public int NumInvisibleLines { get; init; }
+    private TetrominoType[,] _matrixCache;
+    private TetrominoType[] _previewCache;
 
-    // struct ObpfTetrion* obpf_create_tetrion(uint64_t seed);
-    [DllImport(Common.DllPath, EntryPoint = "obpf_create_tetrion")]
-    public static extern IntPtr CreateTetrion(ulong seed);
+    public Tetrion(ulong seed) {
+        _tetrion = Api.Ffi.Tetrion.CreateTetrion(seed);
+        Width = Api.Ffi.Tetrion.GetWidth();
+        Height = Api.Ffi.Tetrion.GetHeight();
+        NumInvisibleLines = Api.Ffi.Tetrion.GetNumInvisibleLines();
+        _matrixCache = new TetrominoType[Width, Height];
+        _previewCache = new TetrominoType[6];
+    }
 
-    // ObpfStats obpf_tetrion_get_stats(struct ObpfTetrion const* tetrion);
-    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_get_stats")]
-    public static extern Stats GetStats(IntPtr tetrion);
+    public Stats GetStats() {
+        var ffiStats = Api.Ffi.Tetrion.GetStats(_tetrion);
+        return new Stats(ffiStats.Score, ffiStats.LinesCleared, ffiStats.Level);
+    }
 
-    // bool obpf_tetrion_is_game_over(struct ObpfTetrion const* tetrion);
-    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_is_game_over")]
-    public static extern bool IsGameOver(IntPtr tetrion);
+    public bool IsGameOver() {
+        return Api.Ffi.Tetrion.IsGameOver(_tetrion);
+    }
 
-    // OBPF_EXPORT ObpfLineClearDelayState obpf_tetrion_get_line_clear_delay_state(struct ObpfTetrion const* tetrion);
-    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_get_line_clear_delay_state")]
-    public static extern LineClearDelayState GetLineClearDelayState(IntPtr tetrion);
+    public LineClearDelayState GetLineClearDelayState() {
+        var ffiState = Api.Ffi.Tetrion.GetLineClearDelayState(_tetrion);
+        var clearedLines = new int[ffiState.Count];
+        for (var i = 0; i < ffiState.Count; i++) {
+            clearedLines[i] = (int)ffiState.Lines[i];
+        }
 
-    // void obpf_destroy_tetrion(struct ObpfTetrion const* tetrion);
-    [DllImport(Common.DllPath, EntryPoint = "obpf_destroy_tetrion")]
-    public static extern void DestroyTetrion(IntPtr tetrion);
+        return new LineClearDelayState(clearedLines, ffiState.Countdown, ffiState.Delay);
+    }
 
-    // bool obpf_tetrion_try_get_active_tetromino(
-    //     struct ObpfTetrion const* tetrion,
-    //     struct ObpfTetromino* out_tetromino
-    // );
-    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_try_get_active_tetromino")]
-    public static extern bool TryGetActiveTetromino(IntPtr tetrion, out Tetromino tetromino);
+    public Tetromino? TryGetActiveTetromino() {
+        if (!Api.Ffi.Tetrion.TryGetActiveTetromino(_tetrion, out var tetromino)) {
+            return null;
+        }
 
-    // bool obpf_tetrion_try_get_ghost_tetromino(
-    //     struct ObpfTetrion const* tetrion,
-    //     struct ObpfTetromino* out_tetromino
-    // );
-    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_try_get_ghost_tetromino")]
-    public static extern bool TryGetGhostTetromino(IntPtr tetrion, out Tetromino tetromino);
+        var minoPositions = tetromino.MinoPositions.Select(p => new Vec2(p.X, p.Y)).ToArray();
+        return new Tetromino(minoPositions, (TetrominoType)tetromino.Type);
+    }
 
-    // ObpfPreviewPieces obpf_tetrion_get_preview_pieces(struct ObpfTetrion const* tetrion);
-    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_get_preview_pieces")]
-    public static extern PreviewPieces GetPreviewPieces(IntPtr tetrion);
+    public Tetromino? TryGetGhostTetromino() {
+        if (!Api.Ffi.Tetrion.TryGetGhostTetromino(_tetrion, out var tetromino)) {
+            return null;
+        }
 
-    // ObpfTetrominoType obpf_tetrion_get_hold_piece(struct ObpfTetrion const* tetrion);
-    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_get_hold_piece")]
-    public static extern TetrominoType GetHoldPiece(IntPtr tetrion);
+        var minoPositions = tetromino.MinoPositions.Select(p => new Vec2(p.X, p.Y)).ToArray();
+        return new Tetromino(minoPositions, (TetrominoType)tetromino.Type);
+    }
 
-    // uint64_t obpf_tetrion_get_next_frame(struct ObpfTetrion const* tetrion);
-    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_get_next_frame")]
-    public static extern ulong GetNextFrame(IntPtr tetrion);
+    public TetrominoType GetHoldPiece() {
+        return (TetrominoType)Api.Ffi.Tetrion.GetHoldPiece(_tetrion);
+    }
 
-    // void obpf_tetrion_simulate_next_frame(struct ObpfTetrion* tetrion, ObpfKeyState key_state);
-    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_simulate_next_frame")]
-    public static extern void SimulateNextFrame(IntPtr tetrion, KeyState keyState);
+    public TetrominoType[] GetPreviewPieces() {
+        var ffiPreviewPieces = Api.Ffi.Tetrion.GetPreviewPieces(_tetrion);
+        for (var i = 0; i < ffiPreviewPieces.Types.Length; i++) {
+            _previewCache[i] = (TetrominoType)ffiPreviewPieces.Types[i];
+        }
 
-    // uint8_t obpf_tetrion_width(void);
-    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_width")]
-    public static extern byte GetWidth();
+        return _previewCache;
+    }
 
-    // uint8_t obpf_tetrion_height(void);
-    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_height")]
-    public static extern byte GetHeight();
+    public ulong GetNextFrame() {
+        return Api.Ffi.Tetrion.GetNextFrame(_tetrion);
+    }
 
-    // uint8_t obpf_tetrion_num_invisible_lines(void);
-    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_num_invisible_lines")]
-    public static extern byte GetNumInvisibleLines();
+    public void SimulateNextFrame(KeyState keyState) {
+        var ffiKeyState = Common.CreateKeyState(
+            keyState.Left,
+            keyState.Right,
+            keyState.Down,
+            keyState.Drop,
+            keyState.RotateCw,
+            keyState.RotateCcw,
+            keyState.Hold
+        );
+        Api.Ffi.Tetrion.SimulateNextFrame(_tetrion, ffiKeyState);
+    }
 
-    // OBPF_EXPORT ObpfTetrominoType obpf_tetrion_matrix_get(const struct ObpfTetrion* tetrion, ObpfVec2 position);
-    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_matrix_get")]
-    public static extern TetrominoType GetMatrixValue(IntPtr tetrion, Vec2 position);
+    public TetrominoType[,] GetMatrix() {
+        for (var x = 0; x < Width; x++) {
+            for (var y = 0; y < Height; y++) {
+                _matrixCache[x, y] = (TetrominoType)Api.Ffi.Tetrion.GetMatrixValue(
+                    _tetrion,
+                    new Api.Ffi.Vec2 { X = (byte)x, Y = (byte)y }
+                );
+            }
+        }
+
+        return _matrixCache;
+    }
+
+    public static Vec2[] GetMinoPositions(TetrominoType type, Rotation rotation) {
+        var ffiMinoPositions = Api.Ffi.Tetrion.GetMinoPositions((Api.Ffi.TetrominoType)type, (Api.Ffi.Rotation)rotation);
+        return ffiMinoPositions.Positions.Select(p => new Vec2(p.X, p.Y)).ToArray();
+    }
+
+    private void ReleaseUnmanagedResources() {
+        Api.Ffi.Tetrion.DestroyTetrion(_tetrion);
+    }
+
+    protected virtual void Dispose(bool disposing) {
+        if (_disposed) {
+            return;
+        }
+
+        ReleaseUnmanagedResources();
+        if (disposing) {
+            // TODO release managed resources here
+        }
+
+        _disposed = true;
+    }
+
+    public void Dispose() {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    ~Tetrion() {
+        Dispose(disposing: false);
+    }
 }

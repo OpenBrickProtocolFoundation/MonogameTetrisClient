@@ -1,4 +1,4 @@
-﻿namespace MonogameTetrisClient;
+﻿namespace MonogameTetrisClient.Api;
 
 public enum Key {
     Left,

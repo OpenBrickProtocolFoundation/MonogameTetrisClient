@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace MonogameTetrisClient.Api;
+namespace MonogameTetrisClient.Api.Ffi;
 
 /* typedef struct {
         ObpfTetrominoType types[6];
