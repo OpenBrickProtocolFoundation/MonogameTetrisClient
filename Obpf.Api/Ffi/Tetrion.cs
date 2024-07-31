@@ -11,6 +11,17 @@ internal class Tetrion {
     [DllImport(Common.DllPath, EntryPoint = "obpf_create_tetrion")]
     public static extern IntPtr CreateTetrion(ulong seed);
 
+    // typedef void (*ObpfActionHandler)(ObpfAction action, void* user_data);
+    public delegate void ActionHandler(Action action, IntPtr userData);
+
+    /* void obpf_tetrion_set_action_handler(
+        struct ObpfTetrion* tetrion,
+        ObpfActionHandler handler,
+        void* user_data
+    ); */
+    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_set_action_handler")]
+    public static extern void SetActionHandler(IntPtr tetrion, ActionHandler? handler, IntPtr userData);
+
     // ObpfStats obpf_tetrion_get_stats(struct ObpfTetrion const* tetrion);
     [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_get_stats")]
     public static extern Stats GetStats(IntPtr tetrion);

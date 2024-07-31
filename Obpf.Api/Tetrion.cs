@@ -1,4 +1,5 @@
-﻿using Obpf.Api.Ffi;
+﻿using System.Runtime.InteropServices;
+using Obpf.Api.Ffi;
 
 namespace Obpf.Api;
 
@@ -11,6 +12,11 @@ public class Tetrion : IDisposable {
     private TetrominoType[,] _matrixCache;
     private TetrominoType[] _previewCache;
 
+    public delegate void ActionHandler(Action action);
+
+    private ActionHandler? _actionHandler = null;
+    private GCHandle? _userDataHandle = null;
+
     public Tetrion(ulong seed) {
         _tetrion = Ffi.Tetrion.CreateTetrion(seed);
         Width = Ffi.Tetrion.GetWidth();
@@ -18,6 +24,29 @@ public class Tetrion : IDisposable {
         NumInvisibleLines = Ffi.Tetrion.GetNumInvisibleLines();
         _matrixCache = new TetrominoType[Width, Height];
         _previewCache = new TetrominoType[6];
+    }
+
+    private static void HandleAction(Ffi.Action action, IntPtr userData) {
+        // todo: null checks
+        var handle = GCHandle.FromIntPtr(userData);
+        var tetrion = (Tetrion)handle.Target;
+        tetrion._actionHandler?.Invoke((Action)action);
+    }
+
+    public void SetActionHandler(ActionHandler? handler) {
+        if (_userDataHandle != null) {
+            _userDataHandle.Value.Free();
+            _userDataHandle = null;
+        }
+
+        _actionHandler = handler;
+        if (handler == null) {
+            Ffi.Tetrion.SetActionHandler(_tetrion, null, IntPtr.Zero);
+            return;
+        }
+
+        _userDataHandle = GCHandle.Alloc(this);
+        Ffi.Tetrion.SetActionHandler(_tetrion, HandleAction, GCHandle.ToIntPtr(_userDataHandle.Value));
     }
 
     public Stats GetStats() {
@@ -107,6 +136,7 @@ public class Tetrion : IDisposable {
 
     private void ReleaseUnmanagedResources() {
         Ffi.Tetrion.DestroyTetrion(_tetrion);
+        _userDataHandle?.Free();
     }
 
     protected virtual void Dispose(bool disposing) {

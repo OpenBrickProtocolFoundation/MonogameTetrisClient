@@ -1,4 +1,4 @@
 ﻿using MonogameTetrisClient;
 
-using var game = new TestGame();// MonogameTetrisClient.ObpfGame();
+using var game = new ObpfGame();// MonogameTetrisClient.ObpfGame();
 game.Run();

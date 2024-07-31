@@ -6,17 +6,17 @@ using Microsoft.Xna.Framework.Graphics;
 namespace MonogameTetrisClient;
 
 public class SceneStack : ISceneManager {
-    private readonly List<IScene> _scenes = new();
+    private readonly List<Scene> _scenes = new();
     private readonly SortedSet<int> _scenesToRemove = new();
     private int _currentSceneIndex = 0;
-    private readonly List<IScene> _scenesToAdd = new();
+    private readonly List<Scene> _scenesToAdd = new();
 
     public bool IsEmpty => _scenes.Count == 0;
 
     public void Update(GameTime gameTime, Assets assets) {
         for (var i = 0; i < _scenes.Count; ++i) {
             _currentSceneIndex = i;
-            if (_scenes[i].Update(gameTime, this, assets) == UpdateResult.StopUpdating) {
+            if (_scenes[i].Update(gameTime, this) == UpdateResult.StopUpdating) {
                 break;
             }
         }
@@ -41,7 +41,7 @@ public class SceneStack : ISceneManager {
 
     public void Draw(GameTime gameTime, SpriteBatch spriteBatch, Assets assets) {
         for (var i = _scenes.Count - 1; i >= 0; --i) {
-            _scenes[i].Draw(gameTime, spriteBatch, assets);
+            _scenes[i].Draw(gameTime, spriteBatch);
         }
     }
 
@@ -49,7 +49,7 @@ public class SceneStack : ISceneManager {
         _scenesToRemove.Add(_currentSceneIndex);
     }
 
-    public void PushScene(IScene scene) {
+    public void PushScene(Scene scene) {
         _scenesToAdd.Add(scene);
     }
 }

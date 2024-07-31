@@ -2,7 +2,7 @@
 
 namespace Obpf.Api.Ffi;
 
-internal class Common {
+internal static class Common {
     public const string DllPath = @"C:\dev\cpp\obpf-simulator\cmake-build-msvc-debug\bin\obpf\obpf_d.dll";
 
     /* ObpfKeyState obpf_key_state_create(

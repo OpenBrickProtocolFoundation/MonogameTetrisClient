@@ -2,5 +2,5 @@
 
 public interface ISceneManager {
     void PopCurrentScene();
-    void PushScene(IScene scene);
+    void PushScene(Scene scene);
 }

@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Obpf.Api;
+using Action = Obpf.Api.Action;
 using KeyState = Obpf.Api.KeyState;
 
 namespace MonogameTetrisClient.Scenes;
@@ -20,7 +21,7 @@ internal struct State {
     public bool Hold;
 }
 
-public sealed class SingleplayerScene : IScene, IDisposable {
+public sealed class SingleplayerScene : Scene, IDisposable {
     private Tetrion _tetrion = null!;
     private Mutex _tetrionMutex = new();
     private State _state = new();
@@ -31,6 +32,8 @@ public sealed class SingleplayerScene : IScene, IDisposable {
     private double _lastFpsMeasureTime = 0.0;
     private uint _framesSinceLastFpsMeasure = 0u;
     private string _fpsString = "-";
+
+    public SingleplayerScene(Assets assets) : base(assets) { }
 
     private static readonly Dictionary<TetrominoType, Color> Colors = new()
     {
@@ -56,15 +59,44 @@ public sealed class SingleplayerScene : IScene, IDisposable {
         { TetrominoType.Z, new Color(80, 0, 0) },
     };
 
-    public void Initialize() {
+    public override void Initialize() {
         _tetrion = new Tetrion((ulong)Random.Shared.Next());
+        _tetrion.SetActionHandler(HandleAction);
 
         _simulationThread = new Thread(KeepSimulating);
         _simulationThread.IsBackground = true;
         _simulationThread.Start();
     }
 
-    public UpdateResult Update(GameTime gameTime, ISceneManager sceneManager, Assets assets) {
+    private void HandleAction(Obpf.Api.Action action) {
+        switch (action) {
+            case Action.RotateCw:
+            case Action.RotateCcw:
+                break;
+            case Action.HardDrop:
+                Assets.SwiffSound.Play();
+                break;
+            case Action.Touch:
+                Assets.ClickSound.Play();
+                break;
+            case Action.Clear1:
+                Assets.Clear1Sound.Play();
+                break;
+            case Action.Clear2:
+                Assets.Clear2Sound.Play();
+                break;
+            case Action.Clear3:
+                Assets.Clear3Sound.Play();
+                break;
+            case Action.Clear4:
+                Assets.Clear4Sound.Play();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(action), action, null);
+        }
+    }
+
+    public override UpdateResult Update(GameTime gameTime, ISceneManager sceneManager) {
         if (
             GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
             || Keyboard.GetState().IsKeyDown(Keys.Escape)
@@ -99,7 +131,7 @@ public sealed class SingleplayerScene : IScene, IDisposable {
         return UpdateResult.KeepUpdating;
     }
 
-    public void Draw(GameTime gameTime, SpriteBatch spriteBatch, Assets assets) {
+    public override void Draw(GameTime gameTime, SpriteBatch spriteBatch) {
         _tetrionMutex.WaitOne();
         var matrix = _tetrion.GetMatrix();
         var activeTetromino = _tetrion.TryGetActiveTetromino();
@@ -112,19 +144,19 @@ public sealed class SingleplayerScene : IScene, IDisposable {
         var nextFrame = _tetrion.GetNextFrame();
         _tetrionMutex.ReleaseMutex();
 
-        DrawTetrionBackground(spriteBatch, assets);
+        DrawTetrionBackground(spriteBatch);
 
         if (holdPieceType != TetrominoType.Empty) {
             var holdPiecePositions = Tetrion.GetMinoPositions(holdPieceType, Rotation.North);
             foreach (var position in holdPiecePositions) {
-                DrawMino(position + new Vec2(1, 2), Colors[holdPieceType], spriteBatch, assets);
+                DrawMino(position + new Vec2(1, 2), Colors[holdPieceType], spriteBatch);
             }
         }
 
         for (int i = 0; i < previewPieces.Length; ++i) {
             var previewPiecePositions = Tetrion.GetMinoPositions(previewPieces[i], Rotation.North);
             foreach (var position in previewPiecePositions) {
-                DrawMino(position + new Vec2(17, 2 + i * 3), Colors[previewPieces[i]], spriteBatch, assets);
+                DrawMino(position + new Vec2(17, 2 + i * 3), Colors[previewPieces[i]], spriteBatch);
             }
         }
 
@@ -133,17 +165,17 @@ public sealed class SingleplayerScene : IScene, IDisposable {
         for (var x = 0; x < _tetrion.Width; x++) {
             for (var y = 0; y < _tetrion.Height; y++) {
                 if (matrix[x, y] != TetrominoType.Empty) {
-                    DrawMino(new Vec2(x, y) + drawOffset, Colors[matrix[x, y]], spriteBatch, assets);
+                    DrawMino(new Vec2(x, y) + drawOffset, Colors[matrix[x, y]], spriteBatch);
                 }
             }
         }
 
         if (ghostTetromino is not null) {
-            DrawTetromino(ghostTetromino.Value, GhostColors, spriteBatch, assets, drawOffset);
+            DrawTetromino(ghostTetromino.Value, GhostColors, spriteBatch, Assets, drawOffset);
         }
 
         if (activeTetromino is not null) {
-            DrawTetromino(activeTetromino.Value, Colors, spriteBatch, assets, drawOffset);
+            DrawTetromino(activeTetromino.Value, Colors, spriteBatch, Assets, drawOffset);
         }
 
         if (lineClearDelayState.Countdown > 0) {
@@ -155,12 +187,12 @@ public sealed class SingleplayerScene : IScene, IDisposable {
             );
             foreach (var line in lineClearDelayState.Lines) {
                 spriteBatch.Draw(
-                    assets.WhiteTexture,
+                    Assets.WhiteTexture,
                     new Rectangle(
-                        6 * assets.MinoTexture.Width,
-                        (line - 2) * assets.MinoTexture.Height,
-                        assets.MinoTexture.Width * _tetrion.Width,
-                        assets.MinoTexture.Height
+                        6 * Assets.MinoTexture.Width,
+                        (line - 2) * Assets.MinoTexture.Height,
+                        Assets.MinoTexture.Width * _tetrion.Width,
+                        Assets.MinoTexture.Height
                     ),
                     color
                 );
@@ -199,9 +231,9 @@ FPS:
 {_fpsString}";
 
         spriteBatch.DrawString(
-            assets.Font,
+            Assets.Font,
             statsString,
-            new Vector2(assets.MinoTexture.Width, assets.MinoTexture.Height * 6),
+            new Vector2(Assets.MinoTexture.Width, Assets.MinoTexture.Height * 6),
             Color.Black,
             0,
             Vector2.Zero,
@@ -212,12 +244,12 @@ FPS:
 
         if (isGameOver) {
             spriteBatch.Draw(
-                assets.WhiteTexture,
+                Assets.WhiteTexture,
                 new Rectangle(
                     0, //6 * _minoTexture.Width,
                     0,
-                    assets.MinoTexture.Width * (_tetrion.Width + 12),
-                    assets.MinoTexture.Height * _tetrion.Height
+                    Assets.MinoTexture.Width * (_tetrion.Width + 12),
+                    Assets.MinoTexture.Height * _tetrion.Height
                 ),
                 Color.Black * 0.5f
             );
@@ -225,9 +257,9 @@ FPS:
             var windowWidth = spriteBatch.GraphicsDevice.Viewport.Width;
             var windowHeight = spriteBatch.GraphicsDevice.Viewport.Height;
 
-            var textSize = assets.Font.MeasureString("Game Over");
+            var textSize = Assets.Font.MeasureString("Game Over");
             spriteBatch.DrawString(
-                assets.Font,
+                Assets.Font,
                 "Game Over",
                 new Vector2(windowWidth / 2f, windowHeight / 2f),
                 Color.White,
@@ -240,9 +272,9 @@ FPS:
         }
     }
 
-    private void DrawTetrionBackground(SpriteBatch spriteBatch, Assets assets) {
+    private void DrawTetrionBackground(SpriteBatch spriteBatch) {
         spriteBatch.Draw(
-            assets.TetrionTexture,
+            Assets.TetrionTexture,
             new Vector2(0f, 0f),
             null,
             Color.White,
@@ -259,14 +291,14 @@ FPS:
         Vec2 offset = default
     ) {
         foreach (var minoPosition in activeTetromino.MinoPositions) {
-            DrawMino(minoPosition + offset, colors[activeTetromino.Type], spriteBatch, assets);
+            DrawMino(minoPosition + offset, colors[activeTetromino.Type], spriteBatch);
         }
     }
 
-    private void DrawMino(Vec2 position, Color color, SpriteBatch spriteBatch, Assets assets) {
+    private void DrawMino(Vec2 position, Color color, SpriteBatch spriteBatch) {
         spriteBatch.Draw(
-            assets.MinoTexture,
-            new Vector2(position.X * assets.MinoTexture.Width, position.Y * assets.MinoTexture.Height),
+            Assets.MinoTexture,
+            new Vector2(position.X * Assets.MinoTexture.Width, position.Y * Assets.MinoTexture.Height),
             null,
             color,
             0f,

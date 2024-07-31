@@ -3,31 +3,18 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace MonogameTetrisClient;
 
-public class TestGame : Game {
+public class ObpfGame : Game {
     private readonly GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch = null!;
     private readonly SceneStack _sceneStack = new();
     private Assets _assets = null!;
 
-    public TestGame() {
+    public ObpfGame() {
         _graphics = new GraphicsDeviceManager(this);
         _graphics.SynchronizeWithVerticalRetrace = false;
         IsFixedTimeStep = false;
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
-    }
-
-    protected override void LoadContent() {
-        _spriteBatch = new SpriteBatch(GraphicsDevice);
-
-        var minoTexture = Content.Load<Texture2D>("mino02");
-        var tetrionTexture = Content.Load<Texture2D>("tetrion");
-        var whiteTexture = new Texture2D(GraphicsDevice, 1, 1);
-        whiteTexture.SetData(new[] { Color.White });
-        var font = Content.Load<SpriteFont>("font");
-        _assets = new Assets(minoTexture, tetrionTexture, whiteTexture, font);
-
-        base.LoadContent();
     }
 
     protected override void Initialize() {
@@ -36,9 +23,17 @@ public class TestGame : Game {
         _graphics.PreferredBackBufferHeight = 640;
         _graphics.ApplyChanges();
 
-        _sceneStack.PushScene(new Scenes.SingleplayerScene());
-
         base.Initialize();
+    }
+
+    protected override void LoadContent() {
+        _spriteBatch = new SpriteBatch(GraphicsDevice);
+        _assets = new Assets(GraphicsDevice, Content);
+
+        // LoadContent() is called after Initialize (WTF?!), so we have to create the initial scene here
+        _sceneStack.PushScene(new Scenes.SingleplayerScene(_assets));
+
+        base.LoadContent();
     }
 
     protected override void Draw(GameTime gameTime) {
