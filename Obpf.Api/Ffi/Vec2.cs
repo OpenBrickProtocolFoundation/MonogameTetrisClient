@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace MonogameTetrisClient.Api.Ffi {
+namespace Obpf.Api.Ffi {
     /* typedef struct {
     uint8_t x;
     uint8_t y;

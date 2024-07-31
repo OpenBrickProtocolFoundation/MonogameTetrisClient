@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace MonogameTetrisClient.Api.Ffi;
+namespace Obpf.Api.Ffi;
 
 internal class Common {
     public const string DllPath = @"C:\dev\cpp\obpf-simulator\cmake-build-msvc-debug\bin\obpf\obpf_d.dll";
@@ -16,7 +16,7 @@ internal class Common {
     );
     */
     [DllImport(DllPath, EntryPoint = "obpf_key_state_create")]
-    public static extern Api.Ffi.KeyState CreateKeyState(
+    public static extern KeyState CreateKeyState(
         bool left,
         bool right,
         bool down,

@@ -1,4 +1,4 @@
-﻿namespace MonogameTetrisClient.Api.Ffi {
+﻿namespace Obpf.Api.Ffi {
     /*
 typedef enum {
     OBPF_ROTATION_NORTH = 0,

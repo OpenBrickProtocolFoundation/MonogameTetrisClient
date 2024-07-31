@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonogameTetrisClient", "Client\MonogameTetrisClient.csproj", "{D324ADCE-FA0A-466B-8D6B-AC50320E6287}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Obpf.Api", "Obpf.Api\Obpf.Api.csproj", "{6B4D91AB-7A99-4F5F-81F3-6940524A0D70}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D324ADCE-FA0A-466B-8D6B-AC50320E6287}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D324ADCE-FA0A-466B-8D6B-AC50320E6287}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D324ADCE-FA0A-466B-8D6B-AC50320E6287}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D324ADCE-FA0A-466B-8D6B-AC50320E6287}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B4D91AB-7A99-4F5F-81F3-6940524A0D70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B4D91AB-7A99-4F5F-81F3-6940524A0D70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B4D91AB-7A99-4F5F-81F3-6940524A0D70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B4D91AB-7A99-4F5F-81F3-6940524A0D70}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

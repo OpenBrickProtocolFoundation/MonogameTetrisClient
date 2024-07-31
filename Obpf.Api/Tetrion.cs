@@ -1,8 +1,6 @@
-﻿using System;
-using System.Linq;
-using MonogameTetrisClient.Api.Ffi;
+﻿using Obpf.Api.Ffi;
 
-namespace MonogameTetrisClient.Api;
+namespace Obpf.Api;
 
 public class Tetrion : IDisposable {
     private readonly IntPtr _tetrion;
@@ -14,25 +12,25 @@ public class Tetrion : IDisposable {
     private TetrominoType[] _previewCache;
 
     public Tetrion(ulong seed) {
-        _tetrion = Api.Ffi.Tetrion.CreateTetrion(seed);
-        Width = Api.Ffi.Tetrion.GetWidth();
-        Height = Api.Ffi.Tetrion.GetHeight();
-        NumInvisibleLines = Api.Ffi.Tetrion.GetNumInvisibleLines();
+        _tetrion = Ffi.Tetrion.CreateTetrion(seed);
+        Width = Ffi.Tetrion.GetWidth();
+        Height = Ffi.Tetrion.GetHeight();
+        NumInvisibleLines = Ffi.Tetrion.GetNumInvisibleLines();
         _matrixCache = new TetrominoType[Width, Height];
         _previewCache = new TetrominoType[6];
     }
 
     public Stats GetStats() {
-        var ffiStats = Api.Ffi.Tetrion.GetStats(_tetrion);
+        var ffiStats = Ffi.Tetrion.GetStats(_tetrion);
         return new Stats(ffiStats.Score, ffiStats.LinesCleared, ffiStats.Level);
     }
 
     public bool IsGameOver() {
-        return Api.Ffi.Tetrion.IsGameOver(_tetrion);
+        return Ffi.Tetrion.IsGameOver(_tetrion);
     }
 
     public LineClearDelayState GetLineClearDelayState() {
-        var ffiState = Api.Ffi.Tetrion.GetLineClearDelayState(_tetrion);
+        var ffiState = Ffi.Tetrion.GetLineClearDelayState(_tetrion);
         var clearedLines = new int[ffiState.Count];
         for (var i = 0; i < ffiState.Count; i++) {
             clearedLines[i] = (int)ffiState.Lines[i];
@@ -42,7 +40,7 @@ public class Tetrion : IDisposable {
     }
 
     public Tetromino? TryGetActiveTetromino() {
-        if (!Api.Ffi.Tetrion.TryGetActiveTetromino(_tetrion, out var tetromino)) {
+        if (!Ffi.Tetrion.TryGetActiveTetromino(_tetrion, out var tetromino)) {
             return null;
         }
 
@@ -51,7 +49,7 @@ public class Tetrion : IDisposable {
     }
 
     public Tetromino? TryGetGhostTetromino() {
-        if (!Api.Ffi.Tetrion.TryGetGhostTetromino(_tetrion, out var tetromino)) {
+        if (!Ffi.Tetrion.TryGetGhostTetromino(_tetrion, out var tetromino)) {
             return null;
         }
 
@@ -60,11 +58,11 @@ public class Tetrion : IDisposable {
     }
 
     public TetrominoType GetHoldPiece() {
-        return (TetrominoType)Api.Ffi.Tetrion.GetHoldPiece(_tetrion);
+        return (TetrominoType)Ffi.Tetrion.GetHoldPiece(_tetrion);
     }
 
     public TetrominoType[] GetPreviewPieces() {
-        var ffiPreviewPieces = Api.Ffi.Tetrion.GetPreviewPieces(_tetrion);
+        var ffiPreviewPieces = Ffi.Tetrion.GetPreviewPieces(_tetrion);
         for (var i = 0; i < ffiPreviewPieces.Types.Length; i++) {
             _previewCache[i] = (TetrominoType)ffiPreviewPieces.Types[i];
         }
@@ -73,7 +71,7 @@ public class Tetrion : IDisposable {
     }
 
     public ulong GetNextFrame() {
-        return Api.Ffi.Tetrion.GetNextFrame(_tetrion);
+        return Ffi.Tetrion.GetNextFrame(_tetrion);
     }
 
     public void SimulateNextFrame(KeyState keyState) {
@@ -86,15 +84,15 @@ public class Tetrion : IDisposable {
             keyState.RotateCcw,
             keyState.Hold
         );
-        Api.Ffi.Tetrion.SimulateNextFrame(_tetrion, ffiKeyState);
+        Ffi.Tetrion.SimulateNextFrame(_tetrion, ffiKeyState);
     }
 
     public TetrominoType[,] GetMatrix() {
         for (var x = 0; x < Width; x++) {
             for (var y = 0; y < Height; y++) {
-                _matrixCache[x, y] = (TetrominoType)Api.Ffi.Tetrion.GetMatrixValue(
+                _matrixCache[x, y] = (TetrominoType)Ffi.Tetrion.GetMatrixValue(
                     _tetrion,
-                    new Api.Ffi.Vec2 { X = (byte)x, Y = (byte)y }
+                    new Ffi.Vec2 { X = (byte)x, Y = (byte)y }
                 );
             }
         }
@@ -103,12 +101,12 @@ public class Tetrion : IDisposable {
     }
 
     public static Vec2[] GetMinoPositions(TetrominoType type, Rotation rotation) {
-        var ffiMinoPositions = Api.Ffi.Tetrion.GetMinoPositions((Api.Ffi.TetrominoType)type, (Api.Ffi.Rotation)rotation);
+        var ffiMinoPositions = Ffi.Tetrion.GetMinoPositions((Ffi.TetrominoType)type, (Ffi.Rotation)rotation);
         return ffiMinoPositions.Positions.Select(p => new Vec2(p.X, p.Y)).ToArray();
     }
 
     private void ReleaseUnmanagedResources() {
-        Api.Ffi.Tetrion.DestroyTetrion(_tetrion);
+        Ffi.Tetrion.DestroyTetrion(_tetrion);
     }
 
     protected virtual void Dispose(bool disposing) {

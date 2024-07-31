@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using MonogameTetrisClient.Api;
-using KeyState = MonogameTetrisClient.Api.KeyState;
+using Obpf.Api;
+using KeyState = Obpf.Api.KeyState;
 
 namespace MonogameTetrisClient.Scenes;
 
@@ -21,7 +20,7 @@ internal struct State {
     public bool Hold;
 }
 
-public sealed class SingleplayerGame : IScene, IDisposable {
+public sealed class SingleplayerScene : IScene, IDisposable {
     private Tetrion _tetrion = null!;
     private Mutex _tetrionMutex = new();
     private State _state = new();
@@ -321,7 +320,7 @@ FPS:
         _tetrion.Dispose();
     }
 
-    ~SingleplayerGame() {
+    ~SingleplayerScene() {
         Dispose();
     }
 }

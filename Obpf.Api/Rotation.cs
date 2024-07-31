@@ -1,4 +1,4 @@
-﻿namespace MonogameTetrisClient.Api;
+﻿namespace Obpf.Api;
 
 public enum Rotation {
     North = 0,

@@ -1,4 +1,4 @@
-﻿namespace MonogameTetrisClient.Api.Ffi {
+﻿namespace Obpf.Api.Ffi {
     /* typedef enum {
     OBPF_TETROMINO_TYPE_EMPTY = 0,
     OBPF_TETROMINO_TYPE_I,
