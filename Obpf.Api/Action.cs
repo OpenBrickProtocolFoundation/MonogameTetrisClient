@@ -9,4 +9,5 @@ public enum Action {
     Clear2,
     Clear3,
     Clear4,
+    AllClear,
 }

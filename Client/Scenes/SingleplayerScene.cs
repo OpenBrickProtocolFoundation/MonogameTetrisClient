@@ -32,6 +32,8 @@ public sealed class SingleplayerScene : Scene, IDisposable {
     private double _lastFpsMeasureTime = 0.0;
     private uint _framesSinceLastFpsMeasure = 0u;
     private string _fpsString = "-";
+    private const int AllClearDuration = 15;
+    private Synchronized<int> _allClearCountdown = new(0);
 
     public SingleplayerScene(Assets assets) : base(assets) { }
 
@@ -90,6 +92,9 @@ public sealed class SingleplayerScene : Scene, IDisposable {
                 break;
             case Action.Clear4:
                 Assets.Clear4Sound.Play();
+                break;
+            case Action.AllClear:
+                _allClearCountdown.Access((ref int value) => value = AllClearDuration);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(action), action, null);
@@ -197,6 +202,20 @@ public sealed class SingleplayerScene : Scene, IDisposable {
                     color
                 );
             }
+        }
+
+        var allClearRatio = _allClearCountdown.Access((ref int value) => (float)value) / (float)AllClearDuration;
+        if (allClearRatio > 0.0) {
+            spriteBatch.Draw(
+                Assets.WhiteTexture,
+                new Rectangle(
+                    6 * Assets.MinoTexture.Width,
+                    0,
+                    Assets.MinoTexture.Width * _tetrion.Width,
+                    Assets.MinoTexture.Height * _tetrion.Height
+                ),
+                Color.White * (float)allClearRatio
+            );
         }
 
         var elapsedSeconds = (double)nextFrame / 60.0;
@@ -341,6 +360,13 @@ FPS:
                     RotateCcw: state.RotateCcw,
                     Hold: state.Hold
                 ));
+                _allClearCountdown.Access((ref int value) => {
+                    if (value > 0) {
+                        --value;
+                    }
+
+                    return 0; // dummy value to satisfy the compiler
+                });
             }
 
             _tetrionMutex.ReleaseMutex();
