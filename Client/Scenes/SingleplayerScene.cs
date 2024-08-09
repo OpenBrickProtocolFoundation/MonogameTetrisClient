@@ -364,8 +364,6 @@ FPS:
                     if (value > 0) {
                         --value;
                     }
-
-                    return 0; // dummy value to satisfy the compiler
                 });
             }
 
