@@ -21,7 +21,7 @@ public class ObpfGame : Game {
 
     protected override void Initialize() {
         _graphics.IsFullScreen = false;
-        _graphics.PreferredBackBufferWidth = 704;
+        _graphics.PreferredBackBufferWidth = 704 + 3 * 10 * 32;
         _graphics.PreferredBackBufferHeight = 640;
         _graphics.ApplyChanges();
 
