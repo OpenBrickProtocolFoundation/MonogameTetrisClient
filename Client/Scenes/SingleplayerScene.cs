@@ -149,6 +149,7 @@ public sealed class SingleplayerScene : Scene, IDisposable {
         var stats = _tetrion.GetStats();
         var isGameOver = _tetrion.IsGameOver();
         var nextFrame = _tetrion.GetNextFrame();
+        var framesUntilGameStart = _tetrion.GetFramesUntilGameStart();
 
         var observerMatrices = new List<TetrominoType[,]>();
         foreach (var observer in _tetrion.Observers.Observers) {
@@ -293,22 +294,31 @@ FPS:
                 Color.Black * 0.5f
             );
 
-            var windowWidth = spriteBatch.GraphicsDevice.Viewport.Width;
-            var windowHeight = spriteBatch.GraphicsDevice.Viewport.Height;
-
-            var textSize = Assets.Font.MeasureString("Game Over");
-            spriteBatch.DrawString(
-                Assets.Font,
-                "Game Over",
-                new Vector2(windowWidth / 2f, windowHeight / 2f),
-                Color.White,
-                0,
-                textSize / 2f,
-                1f,
-                SpriteEffects.None,
-                0.5f
-            );
+            RenderTextCentered(spriteBatch, "Game Over");
         }
+
+        if (framesUntilGameStart > 0) {
+            var remainingTime = framesUntilGameStart / 60.0;
+            RenderTextCentered(spriteBatch, $"Starting in {remainingTime:0.0} s...");
+        }
+    }
+
+    private void RenderTextCentered(SpriteBatch spriteBatch, string text) {
+        var windowWidth = spriteBatch.GraphicsDevice.Viewport.Width;
+        var windowHeight = spriteBatch.GraphicsDevice.Viewport.Height;
+
+        var textSize = Assets.Font.MeasureString("Game Over");
+        spriteBatch.DrawString(
+            Assets.Font,
+            text,
+            new Vector2(windowWidth / 2f, windowHeight / 2f),
+            Color.White,
+            0,
+            textSize / 2f,
+            1f,
+            SpriteEffects.None,
+            0.5f
+        );
     }
 
     private void DrawTetrionBackground(SpriteBatch spriteBatch) {

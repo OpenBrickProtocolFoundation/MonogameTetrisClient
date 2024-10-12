@@ -30,6 +30,10 @@ internal class Tetrion {
     // typedef void (*ObpfActionHandler)(ObpfAction action, void* user_data);
     public delegate void ActionHandler(Action action, IntPtr userData);
 
+    // uint64_t obpf_tetrion_frames_until_game_start(struct ObpfTetrion const* tetrion);
+    [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_frames_until_game_start")]
+    public static extern ulong FramesUntilGameStart(IntPtr tetrion);
+
     /* void obpf_tetrion_set_action_handler(
         struct ObpfTetrion* tetrion,
         ObpfActionHandler handler,

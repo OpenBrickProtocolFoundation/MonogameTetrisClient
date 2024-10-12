@@ -55,6 +55,10 @@ public class Tetrion : ICloneable, IDisposable {
         Ffi.Tetrion.SetActionHandler(_tetrion, HandleAction, GCHandle.ToIntPtr(_userDataHandle.Value));
     }
 
+    public ulong GetFramesUntilGameStart() {
+        return Ffi.Tetrion.FramesUntilGameStart(_tetrion);
+    }
+
     public Stats GetStats() {
         var ffiStats = Ffi.Tetrion.GetStats(_tetrion);
         return new Stats(ffiStats.Score, ffiStats.LinesCleared, ffiStats.Level);
