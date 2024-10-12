@@ -63,13 +63,13 @@ public sealed class SingleplayerScene : Scene, IDisposable {
 
         {
             using var writer = new StreamWriter(_configFile);
-            writer.WriteLine("Left: 65");
-            writer.WriteLine("Right: 68");
-            writer.WriteLine("Down: 83");
-            writer.WriteLine("Drop: 87");
-            writer.WriteLine("RotateCw: 38");
-            writer.WriteLine("RotateCcw: 37");
-            writer.WriteLine("Hold: 69");
+            writer.WriteLine($"Left: {(int)Keys.A}");
+            writer.WriteLine($"Right: {(int)Keys.D}");
+            writer.WriteLine($"Down: {(int)Keys.S}");
+            writer.WriteLine($"Drop: {(int)Keys.W}");
+            writer.WriteLine($"RotateCw: {(int)Keys.Right}");
+            writer.WriteLine($"RotateCcw: {(int)Keys.Left}");
+            writer.WriteLine($"Hold: {(int)Keys.E}");
         }
 
         return ParseConfigFile();
