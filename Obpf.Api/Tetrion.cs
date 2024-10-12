@@ -55,6 +55,10 @@ public class Tetrion : ICloneable, IDisposable {
         Ffi.Tetrion.SetActionHandler(_tetrion, HandleAction, GCHandle.ToIntPtr(_userDataHandle.Value));
     }
 
+    public bool IsConnected() {
+        return Ffi.Tetrion.IsConnected(_tetrion);
+    }
+
     public ulong GetFramesUntilGameStart() {
         return Ffi.Tetrion.FramesUntilGameStart(_tetrion);
     }

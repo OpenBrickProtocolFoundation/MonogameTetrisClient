@@ -151,10 +151,17 @@ public sealed class SingleplayerScene : Scene, IDisposable {
         var nextFrame = _tetrion.GetNextFrame();
         var framesUntilGameStart = _tetrion.GetFramesUntilGameStart();
 
-        var observerMatrices = new List<TetrominoType[,]>();
+        var observerStates = new List<(TetrominoType[,] matrix, bool isGameOver, bool isConnected)>();
         foreach (var observer in _tetrion.Observers.Observers) {
-            observerMatrices.Add(observer.GetMatrix());
+            observerStates.Add(
+                (
+                    matrix: observer.GetMatrix(),
+                    isGameOver: observer.IsGameOver(),
+                    isConnected: observer.IsConnected()
+                )
+            );
         }
+
         _tetrionMutex.ReleaseMutex();
 
         DrawTetrionBackground(spriteBatch);
@@ -184,13 +191,27 @@ public sealed class SingleplayerScene : Scene, IDisposable {
         }
 
         var observerIndex = 0;
-        foreach (var observerMatrix in observerMatrices) {
+        foreach (var (observerMatrix, gameOver, isConnected) in observerStates) {
             for (var x = 0; x < _tetrion.Width; x++) {
                 for (var y = 0; y < _tetrion.Height; y++) {
                     if (observerMatrix[x, y] != TetrominoType.Empty) {
-                        DrawMino(new Vec2(x + 22, y) + drawOffset with { X = observerIndex * 10 }, Colors[observerMatrix[x, y]], spriteBatch);
+                        DrawMino(new Vec2(x + 22, y) + drawOffset with { X = observerIndex * 10 },
+                            Colors[observerMatrix[x, y]], spriteBatch);
                     }
                 }
+            }
+
+            if (gameOver || !isConnected) {
+                spriteBatch.Draw(
+                    Assets.WhiteTexture,
+                    new Rectangle(
+                        (22 + observerIndex * _tetrion.Width) * Assets.MinoTexture.Width,
+                        0,
+                        Assets.MinoTexture.Width * _tetrion.Width,
+                        Assets.MinoTexture.Height * _tetrion.Height
+                    ),
+                    Color.Black * 0.5f
+                );
             }
 
             ++observerIndex;
