@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace MonogameTetrisClient;
@@ -10,6 +11,7 @@ public class ObpfGame : Game {
     private Assets _assets = null!;
 
     public ObpfGame() {
+        InactiveSleepTime = new TimeSpan(0);
         _graphics = new GraphicsDeviceManager(this);
         _graphics.SynchronizeWithVerticalRetrace = false;
         IsFixedTimeStep = false;
