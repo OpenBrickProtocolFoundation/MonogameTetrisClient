@@ -62,11 +62,13 @@ public sealed class SingleplayerScene : Scene, IDisposable {
     };
 
     public override void Initialize() {
-        _tetrion = new Tetrion((ulong)Random.Shared.Next());
+        // _tetrion = new Tetrion((ulong)Random.Shared.Next());
+        _tetrion = new Tetrion("127.0.0.1", 12345);
         _tetrion.SetActionHandler(HandleAction);
-
-        _simulationThread = new Thread(KeepSimulating);
-        _simulationThread.IsBackground = true;
+        _simulationThread = new Thread(KeepSimulating)
+        {
+            IsBackground = true,
+        };
         _simulationThread.Start();
     }
 
@@ -147,6 +149,11 @@ public sealed class SingleplayerScene : Scene, IDisposable {
         var stats = _tetrion.GetStats();
         var isGameOver = _tetrion.IsGameOver();
         var nextFrame = _tetrion.GetNextFrame();
+
+        var observerMatrices = new List<TetrominoType[,]>();
+        foreach (var observer in _tetrion.Observers.Observers) {
+            observerMatrices.Add(observer.GetMatrix());
+        }
         _tetrionMutex.ReleaseMutex();
 
         DrawTetrionBackground(spriteBatch);
@@ -173,6 +180,19 @@ public sealed class SingleplayerScene : Scene, IDisposable {
                     DrawMino(new Vec2(x, y) + drawOffset, Colors[matrix[x, y]], spriteBatch);
                 }
             }
+        }
+
+        var observerIndex = 0;
+        foreach (var observerMatrix in observerMatrices) {
+            for (var x = 0; x < _tetrion.Width; x++) {
+                for (var y = 0; y < _tetrion.Height; y++) {
+                    if (observerMatrix[x, y] != TetrominoType.Empty) {
+                        DrawMino(new Vec2(x + 22, y) + drawOffset with { X = observerIndex * 10 }, Colors[observerMatrix[x, y]], spriteBatch);
+                    }
+                }
+            }
+
+            ++observerIndex;
         }
 
         if (ghostTetromino is not null) {

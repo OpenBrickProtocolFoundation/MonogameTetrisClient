@@ -3,12 +3,13 @@ using Obpf.Api.Ffi;
 
 namespace Obpf.Api;
 
-public class Tetrion : IDisposable {
+public class Tetrion : ICloneable, IDisposable {
     private readonly IntPtr _tetrion;
     private bool _disposed = false;
     public int Width { get; init; }
     public int Height { get; init; }
     public int NumInvisibleLines { get; init; }
+    public ObserverList Observers { get; init; }
     private TetrominoType[,] _matrixCache;
     private TetrominoType[] _previewCache;
 
@@ -17,14 +18,19 @@ public class Tetrion : IDisposable {
     private ActionHandler? _actionHandler = null;
     private GCHandle? _userDataHandle = null;
 
-    public Tetrion(ulong seed) {
-        _tetrion = Ffi.Tetrion.CreateTetrion(seed);
+    internal Tetrion(IntPtr tetrion) {
+        _tetrion = tetrion;
+        Observers = new ObserverList(Ffi.Tetrion.GetObservers(_tetrion));
         Width = Ffi.Tetrion.GetWidth();
         Height = Ffi.Tetrion.GetHeight();
         NumInvisibleLines = Ffi.Tetrion.GetNumInvisibleLines();
         _matrixCache = new TetrominoType[Width, Height];
         _previewCache = new TetrominoType[6];
     }
+
+    public Tetrion(ulong seed) : this(Ffi.Tetrion.CreateTetrion(seed)) { }
+
+    public Tetrion(string host, ushort port) : this(Ffi.Tetrion.CreateMultiplayerTetrion(host, port)) { }
 
     private static void HandleAction(Ffi.Action action, IntPtr userData) {
         // todo: null checks
@@ -147,6 +153,7 @@ public class Tetrion : IDisposable {
         ReleaseUnmanagedResources();
         if (disposing) {
             // TODO release managed resources here
+            Observers.Dispose();
         }
 
         _disposed = true;
@@ -159,5 +166,9 @@ public class Tetrion : IDisposable {
 
     ~Tetrion() {
         Dispose(disposing: false);
+    }
+
+    public object Clone() {
+        return new Tetrion(Ffi.Tetrion.CloneTetrion(_tetrion));
     }
 }
