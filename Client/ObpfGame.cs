@@ -9,8 +9,12 @@ public class ObpfGame : Game {
     private SpriteBatch _spriteBatch = null!;
     private readonly SceneStack _sceneStack = new();
     private Assets _assets = null!;
+    private readonly string _server;
+    private readonly ushort _port;
 
-    public ObpfGame() {
+    public ObpfGame(string server, ushort port) {
+        this._server = server;
+        this._port = port;
         InactiveSleepTime = new TimeSpan(0);
         _graphics = new GraphicsDeviceManager(this);
         _graphics.SynchronizeWithVerticalRetrace = false;
@@ -33,7 +37,7 @@ public class ObpfGame : Game {
         _assets = new Assets(GraphicsDevice, Content);
 
         // LoadContent() is called after Initialize (WTF?!), so we have to create the initial scene here
-        _sceneStack.PushScene(new Scenes.SingleplayerScene(_assets));
+        _sceneStack.PushScene(new Scenes.SingleplayerScene(_assets, _server, _port));
 
         base.LoadContent();
     }

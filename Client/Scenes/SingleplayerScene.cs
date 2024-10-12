@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -21,6 +22,16 @@ internal struct State {
     public bool Hold;
 }
 
+internal struct KeyMapping {
+    public Keys Left;
+    public Keys Right;
+    public Keys Down;
+    public Keys Drop;
+    public Keys RotateCw;
+    public Keys RotateCcw;
+    public Keys Hold;
+}
+
 public sealed class SingleplayerScene : Scene, IDisposable {
     private Tetrion _tetrion = null!;
     private Mutex _tetrionMutex = new();
@@ -34,8 +45,77 @@ public sealed class SingleplayerScene : Scene, IDisposable {
     private string _fpsString = "-";
     private const int AllClearDuration = 15;
     private Synchronized<int> _allClearCountdown = new(0);
+    private string server;
+    private ushort port;
+    private KeyMapping _keyMapping = LoadOrCreateKeyMapping();
 
-    public SingleplayerScene(Assets assets) : base(assets) { }
+    private static readonly string _configFile = "controls.cfg";
+
+    public SingleplayerScene(Assets assets, string server, ushort port) : base(assets) {
+        this.server = server;
+        this.port = port;
+    }
+
+    private static KeyMapping LoadOrCreateKeyMapping() {
+        if (File.Exists(_configFile)) {
+            return ParseConfigFile();
+        }
+
+        {
+            using var writer = new StreamWriter(_configFile);
+            writer.WriteLine("Left: 65");
+            writer.WriteLine("Right: 68");
+            writer.WriteLine("Down: 83");
+            writer.WriteLine("Drop: 87");
+            writer.WriteLine("RotateCw: 38");
+            writer.WriteLine("RotateCcw: 37");
+            writer.WriteLine("Hold: 69");
+        }
+
+        return ParseConfigFile();
+    }
+
+    private static KeyMapping ParseConfigFile() {
+        // todo: check if all keys are unique and all keys have been set
+        var keyMapping = new KeyMapping();
+        var lines = File.ReadAllLines(_configFile);
+        foreach (var line in lines) {
+            var parts = line.Split(':');
+            if (parts.Length == 2) {
+                var keyName = parts[0].Trim();
+                var keyValue = int.Parse(parts[1].Trim());
+
+                switch (keyName) {
+                    case "Left":
+                        keyMapping.Left = (Keys)keyValue;
+                        break;
+                    case "Right":
+                        keyMapping.Right = (Keys)keyValue;
+                        break;
+                    case "Down":
+                        keyMapping.Down = (Keys)keyValue;
+                        break;
+                    case "Drop":
+                        keyMapping.Drop = (Keys)keyValue;
+                        break;
+                    case "RotateCw":
+                        keyMapping.RotateCw = (Keys)keyValue;
+                        break;
+                    case "RotateCcw":
+                        keyMapping.RotateCcw = (Keys)keyValue;
+                        break;
+                    case "Hold":
+                        keyMapping.Hold = (Keys)keyValue;
+                        break;
+                    default:
+                        throw new Exception($"Unknown key name: {keyName}");
+                }
+            }
+        }
+
+        return keyMapping;
+    }
+
 
     private static readonly Dictionary<TetrominoType, Color> Colors = new()
     {
@@ -63,7 +143,7 @@ public sealed class SingleplayerScene : Scene, IDisposable {
 
     public override void Initialize() {
         // _tetrion = new Tetrion((ulong)Random.Shared.Next());
-        _tetrion = new Tetrion("127.0.0.1", 12345);
+        _tetrion = new Tetrion(server, port);
         _tetrion.SetActionHandler(HandleAction);
         _simulationThread = new Thread(KeepSimulating)
         {
@@ -114,13 +194,13 @@ public sealed class SingleplayerScene : Scene, IDisposable {
             return UpdateResult.KeepUpdating;
         }
 
-        var left = Keyboard.GetState().IsKeyDown(Keys.A);
-        var right = Keyboard.GetState().IsKeyDown(Keys.D);
-        var down = Keyboard.GetState().IsKeyDown(Keys.S);
-        var drop = Keyboard.GetState().IsKeyDown(Keys.W);
-        var rotateCw = Keyboard.GetState().IsKeyDown(Keys.Right);
-        var rotateCcw = Keyboard.GetState().IsKeyDown(Keys.Left);
-        var hold = Keyboard.GetState().IsKeyDown(Keys.E);
+        var left = Keyboard.GetState().IsKeyDown(_keyMapping.Left);
+        var right = Keyboard.GetState().IsKeyDown(_keyMapping.Right);
+        var down = Keyboard.GetState().IsKeyDown(_keyMapping.Down);
+        var drop = Keyboard.GetState().IsKeyDown(_keyMapping.Drop);
+        var rotateCw = Keyboard.GetState().IsKeyDown(_keyMapping.RotateCw);
+        var rotateCcw = Keyboard.GetState().IsKeyDown(_keyMapping.RotateCcw);
+        var hold = Keyboard.GetState().IsKeyDown(_keyMapping.Hold);
 
         _stateMutex.WaitOne();
         _state = new State

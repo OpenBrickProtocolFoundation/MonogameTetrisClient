@@ -1,4 +1,15 @@
-﻿using MonogameTetrisClient;
+﻿using System;
+using MonogameTetrisClient;
 
-using var game = new ObpfGame();// MonogameTetrisClient.ObpfGame();
+if (args.Length != 2) {
+    Console.Error.WriteLine("Usage: MonogameTetrisClient <server> <port>");
+    return 1;
+}
+
+var server = args[0];
+var port = ushort.Parse(args[1]);
+
+using var game = new ObpfGame(server, port);
 game.Run();
+
+return 0;
