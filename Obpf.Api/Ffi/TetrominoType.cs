@@ -8,6 +8,7 @@
     OBPF_TETROMINO_TYPE_S,
     OBPF_TETROMINO_TYPE_T,
     OBPF_TETROMINO_TYPE_Z,
+    OBPF_TETROMINO_TYPE_GARBAGE,
     OBPF_TETROMINO_TYPE_LAST = OBPF_TETROMINO_TYPE_Z,
 } ObpfTetrominoType;
 */
@@ -20,6 +21,7 @@
         S,
         T,
         Z,
-        Last = Z,
+        Garbage,
+        Last = Garbage,
     }
 }

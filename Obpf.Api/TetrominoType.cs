@@ -9,4 +9,5 @@ public enum TetrominoType {
     S,
     T,
     Z,
+    Garbage,
 }

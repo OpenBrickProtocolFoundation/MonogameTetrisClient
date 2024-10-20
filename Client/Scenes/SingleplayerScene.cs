@@ -127,6 +127,7 @@ public sealed class SingleplayerScene : Scene, IDisposable {
         { TetrominoType.S, new Color(0, 240, 0) },
         { TetrominoType.T, new Color(160, 0, 240) },
         { TetrominoType.Z, new Color(240, 0, 0) },
+        { TetrominoType.Garbage, new Color(127, 127, 127) },
     };
 
     private static readonly Dictionary<TetrominoType, Color> GhostColors = new()
@@ -139,6 +140,7 @@ public sealed class SingleplayerScene : Scene, IDisposable {
         { TetrominoType.S, new Color(0, 80, 0) },
         { TetrominoType.T, new Color(50, 0, 80) },
         { TetrominoType.Z, new Color(80, 0, 0) },
+        { TetrominoType.Garbage, new Color(127, 127, 127) },
     };
 
     public override void Initialize() {
