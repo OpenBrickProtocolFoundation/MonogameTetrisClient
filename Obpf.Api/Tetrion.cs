@@ -15,6 +15,8 @@ public class Tetrion : ICloneable, IDisposable {
 
     public delegate void ActionHandler(Action action);
 
+    /* The following static field is required to prevent the delegate from being garbage collected. */
+    private static Ffi.Tetrion.ActionHandler s_handleActionDelegateInstance = HandleAction;
     private ActionHandler? _actionHandler = null;
     private GCHandle? _userDataHandle = null;
 
@@ -52,7 +54,7 @@ public class Tetrion : ICloneable, IDisposable {
         }
 
         _userDataHandle = GCHandle.Alloc(this);
-        Ffi.Tetrion.SetActionHandler(_tetrion, HandleAction, GCHandle.ToIntPtr(_userDataHandle.Value));
+        Ffi.Tetrion.SetActionHandler(_tetrion, s_handleActionDelegateInstance, GCHandle.ToIntPtr(_userDataHandle.Value));
     }
 
     public bool IsConnected() {
