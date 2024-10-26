@@ -45,13 +45,13 @@ public sealed class SingleplayerScene : Scene, IDisposable {
     private string _fpsString = "-";
     private const int AllClearDuration = 15;
     private Synchronized<int> _allClearCountdown = new(0);
-    private string server;
-    private ushort port;
+    private string? server;
+    private ushort? port;
     private KeyMapping _keyMapping = LoadOrCreateKeyMapping();
 
     private static readonly string _configFile = "controls.cfg";
 
-    public SingleplayerScene(Assets assets, string server, ushort port) : base(assets) {
+    public SingleplayerScene(Assets assets, string? server, ushort? port) : base(assets) {
         this.server = server;
         this.port = port;
     }
@@ -144,8 +144,11 @@ public sealed class SingleplayerScene : Scene, IDisposable {
     };
 
     public override void Initialize() {
-        // _tetrion = new Tetrion((ulong)Random.Shared.Next());
-        _tetrion = new Tetrion(server, port);
+        if (server is not null && port is not null) {
+            _tetrion = new Tetrion(server, port.Value);
+        } else {
+            _tetrion = new Tetrion((ulong)Random.Shared.Next());
+        }
         _tetrion.SetActionHandler(HandleAction);
         _simulationThread = new Thread(KeepSimulating)
         {

@@ -9,12 +9,15 @@ public class ObpfGame : Game {
     private SpriteBatch _spriteBatch = null!;
     private readonly SceneStack _sceneStack = new();
     private Assets _assets = null!;
-    private readonly string _server;
-    private readonly ushort _port;
+    private readonly string? _server;
+    private readonly ushort? _port;
 
-    public ObpfGame(string server, ushort port) {
-        this._server = server;
-        this._port = port;
+    public ObpfGame(string server, ushort port) : this() {
+        _server = server;
+        _port = port;
+    }
+
+    public ObpfGame() {
         InactiveSleepTime = new TimeSpan(0);
         _graphics = new GraphicsDeviceManager(this);
         _graphics.SynchronizeWithVerticalRetrace = false;
