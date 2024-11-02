@@ -6,6 +6,7 @@ namespace Obpf.Api;
 public class Tetrion : ICloneable, IDisposable {
     private readonly IntPtr _tetrion;
     private bool _disposed = false;
+    public ulong GarbageDelayFrames { get; init; }
     public int Width { get; init; }
     public int Height { get; init; }
     public int NumInvisibleLines { get; init; }
@@ -23,6 +24,7 @@ public class Tetrion : ICloneable, IDisposable {
     internal Tetrion(IntPtr tetrion) {
         _tetrion = tetrion;
         Observers = new ObserverList(Ffi.Tetrion.GetObservers(_tetrion));
+        GarbageDelayFrames = Ffi.Tetrion.GetGarbageDelayFrames();
         Width = Ffi.Tetrion.GetWidth();
         Height = Ffi.Tetrion.GetHeight();
         NumInvisibleLines = Ffi.Tetrion.GetNumInvisibleLines();
@@ -54,7 +56,8 @@ public class Tetrion : ICloneable, IDisposable {
         }
 
         _userDataHandle = GCHandle.Alloc(this);
-        Ffi.Tetrion.SetActionHandler(_tetrion, s_handleActionDelegateInstance, GCHandle.ToIntPtr(_userDataHandle.Value));
+        Ffi.Tetrion.SetActionHandler(_tetrion, s_handleActionDelegateInstance,
+            GCHandle.ToIntPtr(_userDataHandle.Value));
     }
 
     public bool IsConnected() {
@@ -68,6 +71,21 @@ public class Tetrion : ICloneable, IDisposable {
     public Stats GetStats() {
         var ffiStats = Ffi.Tetrion.GetStats(_tetrion);
         return new Stats(ffiStats.Score, ffiStats.LinesCleared, ffiStats.Level);
+    }
+
+    public uint GetGarbageQueueLength() {
+        return Ffi.Tetrion.GetGarbageQueueLength(_tetrion);
+    }
+
+    public IReadOnlyList<GarbageEvent> GetGarbageQueue() {
+        var numEvents = Ffi.Tetrion.GetGarbageQueueNumEvents(_tetrion);
+        var events = new List<GarbageEvent>((int)numEvents);
+        for (var i = 0; i < numEvents; i++) {
+            var ffiEvent = Ffi.Tetrion.GetGarbageQueueEvent(_tetrion, (uint)i);
+            events.Add(new GarbageEvent(ffiEvent.NumLines, ffiEvent.RemainingFrames));
+        }
+
+        return events;
     }
 
     public bool IsGameOver() {

@@ -92,6 +92,22 @@ internal class Tetrion {
     [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_simulate_next_frame")]
     public static extern void SimulateNextFrame(IntPtr tetrion, KeyState keyState);
 
+    // uint32_t obpf_garbage_queue_length(struct ObpfTetrion const* tetrion);
+    [DllImport(Common.DllPath, EntryPoint = "obpf_garbage_queue_length")]
+    public static extern uint GetGarbageQueueLength(IntPtr tetrion);
+
+    // uint32_t obpf_garbage_queue_num_events(struct ObpfTetrion const* tetrion);
+    [DllImport(Common.DllPath, EntryPoint = "obpf_garbage_queue_num_events")]
+    public static extern uint GetGarbageQueueNumEvents(IntPtr tetrion);
+
+    // struct ObpfGarbageEvent obpf_garbage_queue_event(struct ObpfTetrion const* tetrion, uint32_t index);
+    [DllImport(Common.DllPath, EntryPoint = "obpf_garbage_queue_event")]
+    public static extern GarbageEvent GetGarbageQueueEvent(IntPtr tetrion, uint index);
+
+    // uint64_t obpf_garbage_delay_frames(void);
+    [DllImport(Common.DllPath, EntryPoint = "obpf_garbage_delay_frames")]
+    public static extern ulong GetGarbageDelayFrames();
+
     // uint8_t obpf_tetrion_width(void);
     [DllImport(Common.DllPath, EntryPoint = "obpf_tetrion_width")]
     public static extern byte GetWidth();

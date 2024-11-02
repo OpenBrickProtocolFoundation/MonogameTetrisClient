@@ -20,7 +20,7 @@ public sealed class Assets {
 
     public Assets(GraphicsDevice graphicsDevice, ContentManager content) {
         MinoTexture = content.Load<Texture2D>("mino02");
-        TetrionTexture = content.Load<Texture2D>("tetrion");
+        TetrionTexture = content.Load<Texture2D>("tetrion_garbage");
         WhiteTexture = new Texture2D(graphicsDevice, 1, 1);
         WhiteTexture.SetData(new[] { Color.White });
         Font = content.Load<SpriteFont>("font");
