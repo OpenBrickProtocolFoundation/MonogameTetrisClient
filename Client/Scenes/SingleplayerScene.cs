@@ -238,11 +238,21 @@ public sealed class SingleplayerScene : Scene, IDisposable {
         var framesUntilGameStart = _tetrion.GetFramesUntilGameStart();
         var garbageQueue = _tetrion.GetGarbageQueue();
 
-        var observerStates = new List<(TetrominoType[,] matrix, bool isGameOver, bool isConnected)>();
+        var observerStates = new List<
+            (
+            TetrominoType[,] matrix,
+            Tetromino? observerActiveTetromino,
+            Tetromino? observerGhostTetromino,
+            bool isGameOver,
+            bool isConnected
+            )
+        >();
         foreach (var observer in _tetrion.Observers.Observers) {
             observerStates.Add(
                 (
                     matrix: observer.GetMatrix(),
+                    observerActiveTetromino: observer.TryGetActiveTetromino(),
+                    observerGhostTetromino: observer.TryGetGhostTetromino(),
                     isGameOver: observer.IsGameOver(),
                     isConnected: observer.IsConnected()
                 )
@@ -315,7 +325,8 @@ public sealed class SingleplayerScene : Scene, IDisposable {
         }
 
         var observerIndex = 0;
-        foreach (var (observerMatrix, gameOver, isConnected) in observerStates) {
+        foreach (var (observerMatrix, observerActiveTetromino, observerGhostTetromino, gameOver, isConnected) in
+                 observerStates) {
             for (var x = 0; x < _tetrion.Width; x++) {
                 for (var y = 0; y < _tetrion.Height; y++) {
                     if (observerMatrix[x, y] != TetrominoType.Empty) {
@@ -323,6 +334,26 @@ public sealed class SingleplayerScene : Scene, IDisposable {
                             Colors[observerMatrix[x, y]], spriteBatch);
                     }
                 }
+            }
+
+            if (observerActiveTetromino is not null) {
+                DrawTetromino(
+                    observerActiveTetromino.Value,
+                    Colors,
+                    spriteBatch,
+                    Assets,
+                    drawOffset with { X = 22 + observerIndex * 10 }
+                );
+            }
+
+            if (observerGhostTetromino is not null) {
+                DrawTetromino(
+                    observerGhostTetromino.Value,
+                    GhostColors,
+                    spriteBatch,
+                    Assets,
+                    drawOffset with { X = 22 + observerIndex * 10 }
+                );
             }
 
             if (gameOver || !isConnected) {
