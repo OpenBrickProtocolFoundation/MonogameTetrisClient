@@ -336,20 +336,20 @@ public sealed class SingleplayerScene : Scene, IDisposable {
                 }
             }
 
-            if (observerActiveTetromino is not null) {
+            if (observerGhostTetromino is not null) {
                 DrawTetromino(
-                    observerActiveTetromino.Value,
-                    Colors,
+                    observerGhostTetromino.Value,
+                    GhostColors,
                     spriteBatch,
                     Assets,
                     drawOffset with { X = 22 + observerIndex * 10 }
                 );
             }
 
-            if (observerGhostTetromino is not null) {
+            if (observerActiveTetromino is not null) {
                 DrawTetromino(
-                    observerGhostTetromino.Value,
-                    GhostColors,
+                    observerActiveTetromino.Value,
+                    Colors,
                     spriteBatch,
                     Assets,
                     drawOffset with { X = 22 + observerIndex * 10 }
